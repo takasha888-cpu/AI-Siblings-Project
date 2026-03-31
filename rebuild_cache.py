@@ -23,7 +23,7 @@ def rebuild_cache():
                     for sub in folder.Folders:
                         stack.append(sub)
             except: pass
-        
+
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(new_cache, f)
         print(f"[*] 地図の更新完了！ {len(new_cache)} 個のフォルダを認識しました。")

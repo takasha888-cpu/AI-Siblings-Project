@@ -57,7 +57,7 @@ def run_sorting_logic():
     move_count = 0
     with open(RULES_FILE, 'r', encoding='utf-8-sig') as f:
         rules_data = json.load(f).get('rules', [])
-    
+
     rules = []
     for r in rules_data:
         rules.append({
@@ -72,10 +72,10 @@ def run_sorting_logic():
     mapper = FolderMapper(namespace)
 
     # パパのアドレス（判定用キーワード）
-    MY_ADDRESS_LOWER = "niiokatakashi" 
+    MY_ADDRESS_LOWER = "niiokatakashi"
 
     utc_now = datetime.datetime.now(datetime.timezone.utc)
-    yesterday_utc = (utc_now - datetime.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    yesterday_utc = (utc_now - datetime.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')     
     # 受信日時の制限を解除し、未読メールすべてを対象にする
     filter_str = "@SQL=\"urn:schemas:httpmail:read\" = 0"
 
@@ -99,15 +99,15 @@ def run_sorting_logic():
                             sender_full = f"{item.SenderName} <{item.SenderEmailAddress}>".lower()
                             to_full = getattr(item, "To", "").lower()
                             body_top = getattr(item, "Body", "").splitlines()[:20]
-                            
-                            # --- 特別ガード判定 (会議 / 自分が関係するメール / 名前指名) ---
+
+                            # --- 特別ガード判定 (会議 / 自分が関係するメール / 名前指名) --- 
                             is_meeting = item.Class in [53, 54, 55, 56, 57]
-                            
+
                             # 【修正箇所】and から or に変更
                             # 自分が送信者、または自分が受信者のどちらかであれば True
                             is_related_to_me = (MY_ADDRESS_LOWER in sender_full) or (MY_ADDRESS_LOWER in to_full)
-                            
-                            has_my_name = any("新岡さん" in line for line in body_top)
+
+                            has_my_name = any("新岡さん" in line for line in body_top)        
 
                             if is_meeting or is_related_to_me or has_my_name:
                                 reason = "会議通知" if is_meeting else ("自分関連" if is_related_to_me else "新岡さん検知")
@@ -118,7 +118,7 @@ def run_sorting_logic():
                                 continue
 
                             if item.Class != 43: continue # 以降は通常のメールのみ
-                            
+
                             # 1. ルールマッチ判定
                             matched = False
                             for rule in rules:
@@ -129,15 +129,15 @@ def run_sorting_logic():
                                     if dest:
                                         item.Move(dest)
                                         move_count += 1
-                                        print(f"    [√] {item.Subject} -> {dest.Name}")
+                                        print(f"    [√] {item.Subject} -> {dest.Name}")       
                                         matched = True
                                         break
-                            
+
                             if matched: continue
 
                     except Exception as e:
                         print(f"    [!] アイテム処理エラー: {e}")
-                
+
                 if folder == root:
                     for sub in folder.Folders: stack.append(sub)
         except Exception as e:
